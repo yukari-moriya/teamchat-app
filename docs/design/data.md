@@ -9,21 +9,25 @@
 
 ---
 
-## 0. この設計の前提（D-05〜D-13 の決定）
+## 0. この設計の前提（D-01・D-05〜D-13・D-16・D-17・D-20 の決定）
 
 データの形に効く決定です。理由は `questions.md` の「8.」にあります。
 
 | ID | 決めたこと | データへの影響 |
 |:--|:--|:--|
+| D-01 | ログインは Laravel 標準の `Auth`（セッション）で自分で書く。**ログイン状態はファイルに保存する** | ログイン状態の表は持たない |
 | D-05 | 削除したメッセージは、行を残し、削除の日時を持ち、本文も残す。SoftDeletes は使わない。経路ごとの扱い（取り出す・数に入れる・除く）は D-05 の補足のとおり | messages に `deleted_at`。削除は行の更新で、行は消えない |
 | D-06 | 返信は**メッセージと同じ表（messages）**に持ち、`parent_id` で元のメッセージを指す | `parent_id` が NULL なら、チャンネルに直接書かれたメッセージ。返信の段数と同じチャンネルであることは、アプリで守る |
 | D-07 | メンバーの表には、**プライベートチャンネルだけ**持つ。作成者も1行として持つ | 公開チャンネルの行は channel_user に入らない |
 | D-08 | 削除の印の列名は `deleted_at` | SoftDeletes と見間違えないよう、定義に注記する |
 | D-09 | 「編集済み」は真偽の列（`is_edited`）で持つ。編集した日時は持たない | `updated_at` は印に使わない |
-| D-10 | Laravel が最初から用意している、**根拠の無いテーブル・列は載せない**（`password_reset_tokens`、`personal_access_tokens`、`failed_jobs`、users の `email_verified_at`・`remember_token`） | migration から消すかどうかは、実装のときに決める |
-| D-11 | **D-01（ログインの仕組み）は未決のまま**書く | ログイン状態の保存先は載せていない。CRUD表の F-02〜F-04 が埋まらない（5章の4） |
+| D-10 | Laravel が最初から用意している、**根拠の無いテーブル・列は載せない**（`password_reset_tokens`、`personal_access_tokens`、`failed_jobs`、users の `email_verified_at`・`remember_token`） | migration から消すかどうかは、実装のときに決める。作成日時・更新日時の列は例外（D-20） |
+| D-11 | D-01（ログインの仕組み）が未決のまま書いた。**D-01 はそのあと決まった** | ログイン状態はファイルに保存するので、表は増えない。CRUD表の F-02〜F-04 も埋めた |
 | D-12 | 検索・重複チェック・メンバー追加の一致は、英字の大小と全角・半角を区別せず、ひらがなとカタカナ・濁点は区別する。そろえた写しの列で比べる | messages に `body_normalized`、users に `name_normalized`・`email_normalized` を足す。UNIQUE は写しの列に付ける |
 | D-13 | メールアドレスは254文字まで | users の `email`・`email_normalized` を varchar(254) にする |
+| D-16 | メンバーから外された人は、自分のメッセージも直せない・消せない | CRUD表の F-16・F-17 で、channels・channel_user を読む |
+| D-17 | チャンネル一覧・サイドバー・公開APIの並びは、作成日時の古い順 | channels の `created_at` を並びに使う |
+| D-20 | 作成日時・更新日時の列は、Laravel の慣習どおり持つ（D-10 の例外） | users に `created_at`・`updated_at`、ほかの3つの表に `updated_at` を足す |
 
 ---
 
@@ -45,6 +49,8 @@ erDiagram
     varchar email "メールアドレス"
     varchar email_normalized UK "メールアドレスをそろえた写し（D-12）"
     varchar password "パスワード（ハッシュ）"
+    datetime created_at "登録日時（D-20）"
+    datetime updated_at "更新日時（D-20）"
   }
   channels {
     bigint id PK
@@ -53,11 +59,13 @@ erDiagram
     boolean is_private "プライベートか"
     bigint creator_id FK "作成者"
     datetime created_at "作成日時"
+    datetime updated_at "更新日時（D-20）"
   }
   channel_user {
     bigint channel_id PK, FK "チャンネル"
     bigint user_id PK, FK "メンバー"
     datetime created_at "追加した日時"
+    datetime updated_at "更新日時（D-20）"
   }
   messages {
     bigint id PK
@@ -69,6 +77,7 @@ erDiagram
     boolean is_edited "編集済みか"
     datetime deleted_at "削除した日時（D-05）"
     datetime created_at "投稿日時"
+    datetime updated_at "更新日時（D-20）"
   }
 ```
 
@@ -79,6 +88,7 @@ erDiagram
 共通の決まり:
 - 日時は、日本時間で保存する（Q-31）。型は `datetime`［設計］
 - 主キーの `id` は、自動で振られる整数［設計］
+- `created_at`・`updated_at` は、Laravel（Eloquent）が作るときと直すときに自動で入れる（D-20）。migration の `timestamps()` は型が `timestamp` で NULL 可になるので、使わずにこの表のとおり列を書く
 - 文字コードは `utf8mb4`。文字の比べ方は D-12 のとおり。比べるのは写しの列（`_normalized`）だけで、写しの列の照合順序は `utf8mb4_bin`
 - 写しの列のそろえ方:
   1. 全角の英数字・記号を半角にする
@@ -99,6 +109,8 @@ erDiagram
 | email | varchar(254) | 不可 | | | メールアドレス。254文字まで。画面に出すのはこの列。重複は email_normalized で止める | spec 3-1 / Q-02 / D-13 |
 | email_normalized | varchar(254) | 不可 | | UNIQUE | メールアドレスをそろえた写し。重複チェック・メンバー追加の一致・ログインの照合に使う。画面には出さない | Q-02 / Q-11 / F-02 / D-12 / D-13 |
 | password | varchar(255) | 不可 | | | パスワードを**ハッシュにして**保存する。8文字以上（入力のチェック） | spec 3-1（「よく使われているやり方」）, 5-1 |
+| created_at | datetime | 不可 | | | 登録日時。使う機能は無い | D-20 |
+| updated_at | datetime | 不可 | | | 更新日時。使う機能は無い | D-20 |
 
 - 削除の操作は無い（Q-33）。そのため、ほかの表から users への外部キーは、削除時に止める（RESTRICT）にする
 
@@ -111,7 +123,8 @@ erDiagram
 | description | varchar(200) | 可 | NULL | | 説明。200文字まで。必須ではない。空のときは NULL［設計］ | spec 3-2, 5-1 / screens.md 4-2 |
 | is_private | boolean | 不可 | | | プライベートなら真。**作ったあとは変えない** | spec 3-2 / F-08 / mock channel-edit。持ち方（真偽）は［設計］ |
 | creator_id | bigint unsigned | 不可 | | FK → users.id（RESTRICT） | 作った人。編集・削除・メンバー管理ができる人 | spec 3-2, 3-3 / F-06, F-08 |
-| created_at | datetime | 不可 | | | 作成日時。公開APIで返す | Q-24 |
+| created_at | datetime | 不可 | | | 作成日時。公開APIで返す。チャンネル一覧・サイドバー・公開APIの並びに使う（古い順。同じ日時ならIDの小さい順） | Q-24 / D-17 |
+| updated_at | datetime | 不可 | | | 更新日時。使う機能は無い | D-20 |
 
 アプリで守る決まり（表の制約では守れないもの）:
 - チャンネル名の重複は、**その人が見られるチャンネルの中だけ**で確かめる（Q-32）。見えないプライベートチャンネルと同じ名前は作れるので、UNIQUE にはできない
@@ -125,6 +138,7 @@ erDiagram
 | channel_id | bigint unsigned | 不可 | | PK, FK → channels.id（CASCADE） | チャンネル。チャンネルを削除したら、行も消える | spec 3-3 / R-02 / F-09 |
 | user_id | bigint unsigned | 不可 | | PK, FK → users.id（RESTRICT） | メンバー | spec 3-3 |
 | created_at | datetime | 不可 | | | 追加した日時。メンバー一覧を「作成者を先頭、そのあとは追加した順」に並べるのに使う | screens.md SC-08 No 7 |
+| updated_at | datetime | 不可 | | | 更新日時。使う機能は無い | D-20 |
 
 - 表の名前は、Laravel が中間テーブルとして既定で探す名前（2つのテーブル名を単数形にして、アルファベット順につなぐ）に合わせた
 - 主キーを（channel_id, user_id）にして、同じ人を2回追加できないようにする（F-12「すでにメンバーである」）
@@ -147,6 +161,7 @@ erDiagram
 | is_edited | boolean | 不可 | 偽 | | 一度でも直したら真。戻さない | spec 3-4 / R-05 / D-09 |
 | deleted_at | datetime | 可 | NULL | | 削除した日時。NULL なら削除されていない。**SoftDeletes は使わない** | D-05 |
 | created_at | datetime | 不可 | | | 投稿日時。画面・検索結果・公開APIで出す | spec 3-4, 3-6 / Q-24 |
+| updated_at | datetime | 不可 | | | 更新日時。使う機能は無い。削除のときにも変わるので、「編集済み」の印には使わない（D-09） | D-20 |
 
 - **返信件数は列で持たず、そのつど数える**［設計］。削除された返信も数える（Q-18、D-05）
 - 削除は `deleted_at` に日時を入れるだけ（行は消えない）。行が消えるのは、チャンネルを削除したときだけ（F-09）
@@ -168,9 +183,9 @@ erDiagram
 | 機能 | users | channels | channel_user | messages | 補足 |
 |:--|:--|:--|:--|:--|:--|
 | F-01 新規登録 | C R | | | | R は表示名・メールアドレスの重複チェック（Q-02） |
-| F-02 ログイン | R | | | | users の R は、入力したメールアドレスをそろえて、`email_normalized` で探す（D-12）。ログイン状態の保存先は D-01 未決（5章の4） |
-| F-03 ログアウト | | | | | **埋まらない**。D-01 未決（5章の4） |
-| F-04 ログイン必須の制御 | | | | | **埋まらない**。D-01 未決（5章の4） |
+| F-02 ログイン | R | | | | users の R は、入力したメールアドレスをそろえて、`email_normalized` で探す（D-12）。ログイン状態はファイルに保存するので、表は使わない（D-01） |
+| F-03 ログアウト | | | | | 表は使わない（ログイン状態はファイル。D-01） |
+| F-04 ログイン必須の制御 | | | | | 表は使わない（ログイン状態はファイル。D-01） |
 | F-05 共通レイアウト | R | R | R | | users はログイン中の氏名。サイドバーは公開すべてと、自分がメンバーのプライベート |
 | F-06 チャンネル一覧 | R | R | R | | users は作成者の表示名 |
 | F-07 チャンネル作成 | | C R | C R | | channel_user の C は、プライベートのときの作成者の行。R は重複チェック（見られるチャンネルの中だけ。Q-32） |
@@ -182,8 +197,8 @@ erDiagram
 | F-13 メンバー削除 | | R | D | | channels の R は作成者の確認（作成者は外せない） |
 | F-14 メッセージ一覧 | R | R | R | R | 削除済みも取り出す（D-05）。返信件数も数える |
 | F-15 メッセージ投稿 | | R | R | C | |
-| F-16 メッセージ編集 | | | | R U | 書いた本人か・削除済みでないかを確かめる。U は本文と写しの列を一緒に直す。**チャンネルを見られるかの確認が要るかは未決**（5章の3） |
-| F-17 メッセージ削除 | | | | R U | F-16 と同じ。U は `deleted_at` を入れる |
+| F-16 メッセージ編集 | | R | R | R U | channels・channel_user の R は、チャンネルを見られるかの確認（D-16）。messages の R は、書いた本人か・削除済みでないかの確認。U は本文と写しの列を一緒に直す |
+| F-17 メッセージ削除 | | R | R | R U | F-16 と同じ。U は `deleted_at` を入れる |
 | F-18 スレッド表示 | R | R | R | R | 元のメッセージが削除済みでも開ける |
 | F-19 返信投稿 | | R | R | C R | messages の R は、元のメッセージが返信でないことの確認（R-08） |
 | F-20 返信件数の表示 | | | | R | 削除された返信も数える（Q-18、D-05） |
@@ -207,9 +222,11 @@ F-26 の初期データは、この表の形で入る。
 
 ## 5. まだ決まっていないこと
 
-| # | 項目 | 何が決まらないか | 影響 | 決める場所 |
-|:--|:--|:--|:--|:--|
-| 1 | 作成日時・更新日時の列（根拠が無いもの） | users の `created_at`・`updated_at` と、各表の `updated_at` は、使う機能が無いので載せていない（D-10 の「根拠の無いものは載せない」）。Laravel の `timestamps()` は2つを一緒に作るので、実装で付けると、この表と食い違う | 実装の migration | 実装のとき |
-| 2 | チャンネル一覧・サイドバーの並び順 | spec にも screens.md にも無い。モックの並びは、初期データの作成順に見えるだけ | データの形には効かない（channels.created_at は公開APIのために持つ） | `screens.md` |
-| 3 | メンバーから外された人が、自分のメッセージを直す・消すこと | 外された人はチャンネルを見られない（F-13）が、自分のメッセージの編集・削除（F-16・F-17）を止めるかは、書かれていない | CRUD表の F-16・F-17 で、channel_user を読むかどうか | `permissions-api.md` |
-| 4 | ログインの仕組み（D-01） | ログイン状態をデータベースに置くかが決まらない。いまの `.env.example` は `SESSION_DRIVER=file` | CRUD表の F-02〜F-04 | `questions.md` の D-01 |
+いまは無い。以前ここにあった4件は、次のとおり決めた（`questions.md` の8章）。
+
+| # | 項目 | 決めたところ |
+|:--|:--|:--|
+| 1 | 作成日時・更新日時の列（根拠が無いもの） | D-20（持つ） |
+| 2 | チャンネル一覧・サイドバーの並び順 | D-17（作成日時の古い順） |
+| 3 | メンバーから外された人が、自分のメッセージを直す・消すこと | D-16（できない） |
+| 4 | ログインの仕組み（D-01） | D-01（自分で書く。ログイン状態はファイル） |
