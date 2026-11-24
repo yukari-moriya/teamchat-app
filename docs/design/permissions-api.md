@@ -111,7 +111,7 @@
 |:--|:--|:--|
 | ログインしているか | `auth` ミドルウェア（未ログインなら SC-01 へ） | F-04 |
 | ログインしていないか | `guest` ミドルウェア（ログイン中なら SC-03 へ。移す先の既定値 `RouteServiceProvider::HOME` は `/home` なので `/channels` に変える） | 1-5 |
-| ログインの試行回数 | ログインの処理で Laravel の `RateLimiter` を使う。メールアドレスのそろえた写しと IP の組ごとに1分5回まで。超えたら SC-01 にエラーを出す（screens.md 4-2） | D-28 |
+| ログインの試行回数 | Fortify の `LoginRateLimiter`（`RateLimiter` を使う）を継いで使う。メールアドレスのそろえた写しと IP の組ごとに1分5回まで。超えたら SC-01 にエラーを出す（screens.md 4-2） | D-28 |
 | チャンネルを見られるか（a） | `ChannelPolicy` の `view`。見られないときは `Response::denyAsNotFound()` で **404** にする | R-01 |
 | チャンネルを作った人か | `ChannelPolicy` の `update`・`delete` | spec 3-2 |
 | メンバーを管理できるか（c） | `ChannelPolicy` の `manageMembers`（作った人で、プライベート）。**先に公開チャンネルかどうかを見て**、公開なら作った人でも 404。プライベートで作った人でなければ 403 | spec 3-3 / F-11 / D-23 |
@@ -155,7 +155,7 @@
 | 21 | GET | `/search` | `search` | SC-09 | F-21, F-22 | auth（結果は f） | — |
 
 - URLの形とルート名は、Laravel のリソースルートの決まりに合わせた［設計］。返信とメッセージは同じ表（D-06）なので、編集・削除（No 19・20）は1つのURLで受ける
-- No 2〜6 は、Laravel 標準の `Auth` を使って自分で書く（D-01）。URLの形は Laravel の慣習に合わせた［設計］
+- No 2〜6 は、Laravel Fortify（使う機能は新規登録だけ）が登録する。画面は自前の Blade（D-01）。URLの形は Laravel の慣習に合わせた［設計］
 - No 10〜20 の `{message}`・`{user}` は、`{channel}` のものに限る（1-6 の `scopeBindings()`）。`{user}` が `{channel}` のメンバーでなければ 404
 - No 18 の `{message}` は、返信でない（元の）メッセージに限る。返信を指したら 404（R-08。画面には返信への返信の操作が無いので、直接送られたときだけ）。削除されたメッセージには返信できる（R-06）
 - 作ってある `/home` への移動・`/api/user`（Sanctum の既定）・`welcome` の画面は使わない（D-10、Q-04）
