@@ -63,6 +63,31 @@ Laravel の標準や慣習と違う決め方をしているものがある。実
 
 - 一覧で関連するデータを出すときは `with()` を付ける。
 
+## 守ってほしい書き方
+
+### 書き方の決まり
+
+- 名前は Laravel の慣例に合わせる（モデルは単数・テーブルは複数・中間テーブルは単数のアルファベット順・コントローラは `<モデル名>Controller`）。
+- 同じ判断を2か所に書かない。権限の判定はポリシーに1か所だけ置く。
+- ネストを深くしない。当てはまらない場合を先に返してから、本筋を書く。
+- 整形は Laravel Pint に任せる（`./vendor/bin/sail pint`）。見た目を手で揃えない。
+- **JavaScript は使わない**（`docs/design/questions.md` の D-03、`docs/design/screens.md` の0章）。文字数の表示・その場編集・削除の確認は、画面を開き直す形で作る。
+
+### 決めごとの在りか
+
+実装を始めると破られやすい決めごとの在りか。書く前に、該当の設計書を読んでから書くこと（上の「実装前に必ず読む決定」に加えて。中身はここに写さない）。同じ決めごとを、`/review-diff`（`.claude/skills/review-diff/SKILL.md` の手順4）が差分で確かめる。
+
+- 見られるチャンネルの絞り込み、削除済みメッセージの除外（画面・検索・公開APIの出口）: `docs/design/permissions-api.md` の1-4・1-6、`docs/design/questions.md` の D-05 の補足
+- 公開APIの返す項目・エラー・呼び方: `docs/design/permissions-api.md` の3章（Q-24・Q-27・R-11）
+- 画面の作り（JavaScript・画面の状態の持ち方・操作のあとの戻り先・フォームの項目名）: `docs/design/screens.md` の0章、`docs/design/permissions-api.md` の2-2・2-3（D-03・D-26）
+- 画面の項目と文言の出し方: `docs/design/screens.md` の3章
+- 入力チェックの上限と文言: `docs/design/screens.md` の4章
+- エラーの扱い（エラー画面・複数の表を書く処理・本番の設定）: `docs/design/behavior.md` の3章（D-14）
+- Laravel が最初から用意している物のうち、使わない物: `docs/design/questions.md` の D-10、`docs/design/permissions-api.md` の2-1 の末尾の注
+- 作らないもの: `docs/design/features.md` の2章
+- 初期データ: `docs/design/features.md` の F-26、`docs/design/data.md` の4章（D-27）
+- 漏れの出口ごとの受け入れ条件とテスト観点: `docs/design/acceptance.md` の1-8・2章
+
 ## プルリクエスト
 
 イシュー1件に1本のブランチを切り、プルリクエストで受け取る。イシューは実装単位（`docs/design/acceptance.md` の 1 認証／2 チャンネル／3 メンバー管理／4 メッセージ／5 スレッド／6 検索／7 公開API）に当たる。
