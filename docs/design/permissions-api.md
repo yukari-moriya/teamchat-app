@@ -155,7 +155,7 @@
 | 21 | GET | `/search` | `search` | SC-09 | F-21, F-22 | auth（結果は f） | — |
 
 - URLの形とルート名は、Laravel のリソースルートの決まりに合わせた［設計］。返信とメッセージは同じ表（D-06）なので、編集・削除（No 19・20）は1つのURLで受ける
-- No 2〜6 は、Laravel Fortify（使う機能は新規登録だけ）が登録する。画面は自前の Blade（D-01）。URLの形は Laravel の慣習に合わせた［設計］
+- No 2〜6 は、Laravel Fortify のコントローラを使い、ルートは `routes/web.php` に書く（Fortify のルート登録は止める。使う機能は新規登録だけ。画面は自前の Blade。D-01）。URLの形は Laravel の慣習に合わせた［設計］
 - No 10〜20 の `{message}`・`{user}` は、`{channel}` のものに限る（1-6 の `scopeBindings()`）。`{user}` が `{channel}` のメンバーでなければ 404
 - No 18 の `{message}` は、返信でない（元の）メッセージに限る。返信を指したら 404（R-08。画面には返信への返信の操作が無いので、直接送られたときだけ）。削除されたメッセージには返信できる（R-06）
 - 作ってある `/home` への移動・`/api/user`（Sanctum の既定）・`welcome` の画面は使わない（D-10、Q-04）
