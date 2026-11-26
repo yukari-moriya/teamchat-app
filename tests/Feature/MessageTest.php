@@ -439,7 +439,7 @@ class MessageTest extends TestCase
         $this->open("?edit[]={$mine->id}")->assertNotFound();
         // 値が空なら、指定が無いのと同じ。ほかのクエリは無視する
         $this->open('?edit=')->assertOk()->assertDontSee('edit_body', false);
-        $this->open('?thread=999999&foo=1')->assertOk();
+        $this->open('?foo=1')->assertOk()->assertDontSee('edit_body', false);
     }
 
     // TP-4-12
