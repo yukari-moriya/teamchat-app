@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./vendor/bin/sail artisan test >&2 || exit 2"
+            "command": "./vendor/bin/sail artisan test --compact >&2 || exit 2"
           },
           {
             "type": "command",
