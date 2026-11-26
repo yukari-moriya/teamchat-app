@@ -24,7 +24,8 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->name(),
+            // 表示名の列は30文字まで（docs/design/data.md 2-1）。作る名前は、まれにそれを超える
+            'name' => mb_substr(fake()->unique()->name(), 0, 30),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
         ];

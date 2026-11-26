@@ -357,3 +357,21 @@ mark{background:#FBEBBD;color:inherit;border-radius:2px;padding:0 1px}
 .page--narrow{max-width:680px}
 /* ラジオの選択中の表示。JavaScript を使わないので、.is-checked の代わりに CSS で切り替える */
 .radio:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
+
+/* チャンネルの画面 — これが無いと、件数が増えたときに画面全体が伸びて、投稿欄が下へ押し出される。スクロールするのは一覧の中だけにする */
+.main{min-height:0}
+
+/* メッセージ — 本文は書いたまま出す。モックの pre-line は続けて書いた空白をまとめるので、pre-wrap にする */
+.msg__body{white-space:pre-wrap;overflow-wrap:anywhere}
+.msg-list .empty{margin:0 var(--sp-6)}
+/* 操作は、行にマウスを乗せたときだけ出す（モックは、出ている状態を1行に直接置いている） */
+.msg__acts{display:none}
+.msg:hover .msg__acts{display:flex}
+.msg__acts form{display:flex;margin:0}
+.msg__acts a.icon-btn:hover{text-decoration:none}
+/* 編集中の欄と、投稿欄のエラー（モックに見本が無い。見せ方は design-guide の4章） */
+.msg-edit{margin-top:var(--sp-1)}
+.msg-edit .field{margin-bottom:var(--sp-2)}
+.composer.is-error .composer__box{border-color:var(--danger);background:var(--danger-soft)}
+.composer.is-error .composer__box:focus-within{box-shadow:0 0 0 3px rgba(179,38,30,.2)}
+.composer .err{margin-top:var(--sp-2)}

@@ -192,6 +192,7 @@ JavaScript を使わない（D-03）ので、SC-04・SC-05・SC-07・SC-09 の�
 - SC-04 のメッセージの行には `id="message-{id}"`、SC-05 の返信の行には `id="reply-{id}"` を付ける（スレッドの元のメッセージは SC-04 と同じ行が2つ並ぶので、パネル側には付けない）
 - SC-04・SC-05 のフォームは、開いているスレッドのIDを `thread` として一緒に送る。戻り先は `/channels/{channel}`（`thread` があれば `?thread=` を付ける）＋`#message-{id}` または `#reply-{id}`。`edit` は付けない（保存したら通常の状態へ）
 - 入力エラーのときは、送った画面（編集中ならその状態のURL）に戻す（D-02）
+- 編集アイコンと「やめる」のリンク、編集の入力エラーの戻り先にも、その行の `#message-{id}` または `#reply-{id}` を付ける（D-32）
 - 検索結果の行のリンク（F-22）も同じ形: チャンネルのメッセージなら `/channels/{channel}#message-{id}`、返信なら `/channels/{channel}?thread={元}#reply-{id}`（Q-22）
 
 ### 2-3. フォームが送る項目
