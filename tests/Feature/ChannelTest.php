@@ -415,6 +415,31 @@ class ChannelTest extends TestCase
         $this->assertSame('RELEASE', $channel->refresh()->name);
     }
 
+    // TP-2-13（D-31）: 名前を変えないときは、同じ名前のチャンネルがほかに見えていても保存できる
+    public function test_unchanged_name_can_be_saved_while_the_same_name_is_visible(): void
+    {
+        $mine = $this->privateChannel($this->me, ['name' => 'Plan']);
+        // 自分の非公開は相手に見えないので、相手はあとから同じ名前の公開チャンネルを作れる（Q-32）
+        $this->publicChannel($this->other, ['name' => 'Plan']);
+
+        // 前後の空白を取り除いて同じなら、変えていないとみなす
+        $this->updateChannel($mine, ['name' => '　Plan ', 'description' => '説明だけ直す'])
+            ->assertRedirect("/channels/{$mine->id}")
+            ->assertSessionHasNoErrors();
+        $this->assertSame(['Plan', '説明だけ直す'], [$mine->refresh()->name, $mine->description]);
+
+        // 英字の大小・全角半角だけの違いでも、名前を変えたものとして調べる
+        foreach (['PLAN', 'Ｐlan'] as $name) {
+            $this->updateChannel($mine, ['name' => $name])
+                ->assertSessionHasErrors(['name' => 'そのチャンネル名はすでに使われています']);
+        }
+        $this->assertSame('Plan', $mine->refresh()->name);
+
+        // 作成では、これまでどおり重複になる
+        $this->createChannel(['name' => 'Plan'])
+            ->assertSessionHasErrors(['name' => 'そのチャンネル名はすでに使われています']);
+    }
+
     // TP-2-14
     public function test_non_creator_gets_403_on_a_visible_channel(): void
     {

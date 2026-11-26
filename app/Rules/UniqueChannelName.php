@@ -21,6 +21,11 @@ class UniqueChannelName implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        // 編集で名前が今のまま（完全一致）なら調べない。同じ名前がほかに見えていても、説明を直せるように（D-31）
+        if ($this->except?->name === $value) {
+            return;
+        }
+
         $target = TextNormalizer::normalize($value);
 
         $taken = Channel::visibleTo($this->user)
