@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
@@ -33,5 +34,15 @@ Route::middleware('auth')->group(function () {
             ->can('update', 'channel');
         Route::delete('/channels/{channel}', [ChannelController::class, 'destroy'])->name('channels.destroy')
             ->can('delete', 'channel');
+
+        Route::post('/channels/{channel}/messages', [MessageController::class, 'store'])
+            ->name('channels.messages.store');
+        // {message} は {channel} のものに限る（違えば 404）。そのあとで、本人のメッセージかを確かめる（403）
+        Route::scopeBindings()->whereNumber('message')->group(function () {
+            Route::put('/channels/{channel}/messages/{message}', [MessageController::class, 'update'])
+                ->name('channels.messages.update')->can('update', 'message');
+            Route::delete('/channels/{channel}/messages/{message}', [MessageController::class, 'destroy'])
+                ->name('channels.messages.destroy')->can('delete', 'message');
+        });
     });
 });

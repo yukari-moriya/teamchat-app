@@ -47,9 +47,34 @@ class ChannelController extends Controller
         return to_route('channels.show', $channel);
     }
 
-    public function show(Channel $channel): View
+    public function show(Request $request, Channel $channel): View
     {
-        return view('channels.show', ['channel' => $channel]);
+        return view('channels.show', [
+            'channel' => $channel,
+            // チャンネルの流れに返信は混ぜない。削除済みも取り出し、返信件数は削除された返信も数える（D-05、Q-18）
+            'messages' => $channel->messages()->whereNull('parent_id')->inListOrder()
+                ->with('user')->withCount('replies')->get(),
+            'editingMessageId' => $this->editingMessageId($request, $channel),
+        ]);
+    }
+
+    /**
+     * ?edit= で編集中にするメッセージ（docs/design/permissions-api.md 2-2）。
+     * このチャンネルに無いIDは 404。あっても直せないもの（他人の・削除済み）と返信は、通常の表示にする（D-26）。
+     */
+    private function editingMessageId(Request $request, Channel $channel): ?int
+    {
+        $id = $request->query('edit');
+
+        if ($id === null) {
+            return null;
+        }
+
+        // 数字に限るのは、MySQL が「1abc」を 1 と読むのを防ぐため
+        $message = is_string($id) && ctype_digit($id) ? $channel->messages()->find($id) : null;
+        abort_if($message === null, 404);
+
+        return $message->parent_id === null && $request->user()->can('update', $message) ? $message->id : null;
     }
 
     public function edit(Request $request, Channel $channel): View
