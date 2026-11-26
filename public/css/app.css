@@ -352,3 +352,8 @@ mark{background:#FBEBBD;color:inherit;border-radius:2px;padding:0 1px}
 .topbar__me form{margin:0}
 .topbar__me button{padding:0;border:0;background:none;font:inherit;color:#A9B3BF;cursor:pointer}
 .topbar__me button:hover{color:#fff;text-decoration:underline}
+
+/* チャンネルを作る・編集する画面の幅（モックは style 属性で指定している） */
+.page--narrow{max-width:680px}
+/* ラジオの選択中の表示。JavaScript を使わないので、.is-checked の代わりに CSS で切り替える */
+.radio:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
