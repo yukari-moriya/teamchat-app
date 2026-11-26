@@ -21,12 +21,28 @@
         </div>
     </header>
     <div class="app__body">
-        <nav class="sidebar"></nav>
-        <main class="main main--scroll">
-            <div class="page">
-                @yield('content')
-            </div>
-        </main>
+        <nav class="sidebar">
+            <div class="side-group">チャンネル</div>
+            @foreach ($sidebarChannels as $sidebarChannel)
+                <a @class(['side-item', 'is-selected' => $sidebarChannel->id === $currentChannelId]) href="{{ route('channels.show', $sidebarChannel) }}">
+                    <x-channel-sign :channel="$sidebarChannel" />
+                    <span class="nm">{{ $sidebarChannel->name }}</span>
+                </a>
+            @endforeach
+            <div class="side-foot"><a href="{{ route('channels.index') }}">チャンネル一覧を見る</a></div>
+        </nav>
+        {{-- チャンネルの画面（chat）は、モックのとおり余白の枠（.page）を使わず、面いっぱいに置く --}}
+        @hasSection('chat')
+            <main class="main">
+                @yield('chat')
+            </main>
+        @else
+            <main class="main main--scroll">
+                <div class="page @yield('page_class')">
+                    @yield('content')
+                </div>
+            </main>
+        @endif
     </div>
 </div>
 </body>
