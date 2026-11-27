@@ -40,6 +40,18 @@ class ChannelPolicy
         return $this->isCreator($user, $channel) ? Response::allow() : Response::deny();
     }
 
+    /** manageMembers の条件（404・403 は同じ）に加えて、作成者は外せない（R-04・D-33） */
+    public function removeMember(User $user, Channel $channel, User $member): Response
+    {
+        $manage = $this->manageMembers($user, $channel);
+
+        if ($manage->denied()) {
+            return $manage;
+        }
+
+        return $this->isCreator($member, $channel) ? Response::deny() : Response::allow();
+    }
+
     private function isCreator(User $user, Channel $channel): bool
     {
         return $channel->creator_id === $user->id;

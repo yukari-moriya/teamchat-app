@@ -607,7 +607,7 @@ class ChannelTest extends TestCase
             ['全体連絡', false, '鈴木 花子', []],
             ['開発', false, '佐藤 太郎', []],
             ['雑談', false, '高橋 健', []],
-            ['採用プロジェクト', true, '佐藤 太郎', ['佐藤 太郎']],
+            ['採用プロジェクト', true, '佐藤 太郎', ['佐藤 太郎', '鈴木 花子']],
         ], $rows);
 
         $response = $this->actingAs(User::where('email', 'takahashi@example.com')->sole())->get('/channels');

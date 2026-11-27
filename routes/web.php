@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -34,6 +35,18 @@ Route::middleware('auth')->group(function () {
             ->can('update', 'channel');
         Route::delete('/channels/{channel}', [ChannelController::class, 'destroy'])->name('channels.destroy')
             ->can('delete', 'channel');
+
+        // メンバー管理は、プライベートチャンネルを作った人だけ（公開は作成者でも 404。D-23）
+        Route::middleware('can:manageMembers,channel')->group(function () {
+            Route::get('/channels/{channel}/members', [MemberController::class, 'index'])
+                ->name('channels.members.index');
+            Route::post('/channels/{channel}/members', [MemberController::class, 'store'])
+                ->name('channels.members.store');
+            // {user} は {channel} のメンバーに限る（違えば 404）。そのあとで、作成者でないかを確かめる（403）
+            Route::delete('/channels/{channel}/members/{user}', [MemberController::class, 'destroy'])
+                ->name('channels.members.destroy')->scopeBindings()->whereNumber('user')
+                ->can('removeMember', ['channel', 'user']);
+        });
 
         Route::post('/channels/{channel}/messages', [MessageController::class, 'store'])
             ->name('channels.messages.store');
