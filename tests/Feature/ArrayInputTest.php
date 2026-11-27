@@ -46,13 +46,25 @@ class ArrayInputTest extends TestCase
         return Channel::factory()->create(['name' => '開発', 'description' => '開発の相談', 'creator_id' => $creator->id]);
     }
 
-    // ログインの欄の文言は Fortify の入力チェックのままなので、画面が開くことと、欄が空になることを確かめる
-    public function test_login_page_opens_after_an_array_email(): void
+    // ログインの入力チェックは Fortify のもので、文言は lang/ja/validation.php。空のときと同じ文言にする
+    #[DataProvider('loginArrays')]
+    public function test_login_with_an_array_is_an_input_error(string $field, string $error): void
     {
-        $this->from('/login')->post('/login', ['email' => self::ARRAY, 'password' => 'password'])
-            ->assertRedirect('/login')->assertSessionHasErrors('email');
+        $this->from('/login')->post('/login', ['email' => 'sato@example.com', 'password' => 'password', $field => self::ARRAY])
+            ->assertRedirect('/login')->assertSessionHasErrors([$field => $error]);
 
-        $this->assertSame('', $this->fieldValue($this->xpath($this->get('/login')->assertOk()), 'email'));
+        $xpath = $this->xpath($this->get('/login')->assertOk());
+        $this->assertSame($error, trim($xpath->query('//span[@class="err"]')->item(0)->textContent));
+        $this->assertSame($field === 'email' ? '' : 'sato@example.com', $this->fieldValue($xpath, 'email'));
+    }
+
+    /** @return array<string, array{string, string}> */
+    public static function loginArrays(): array
+    {
+        return [
+            'メールアドレス' => ['email', 'メールアドレスを入力してください'],
+            'パスワード' => ['password', 'パスワードを入力してください'],
+        ];
     }
 
     /** @param array<string, mixed> $overrides */
