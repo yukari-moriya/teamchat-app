@@ -4,7 +4,7 @@
 --}}
 <div class="field @error('name') is-error @enderror">
     <label class="label" for="name">チャンネル名<span class="req">*</span></label>
-    <input class="input" id="name" name="name" type="text" value="{{ old('name', $channel?->name) }}">
+    <input class="input" id="name" name="name" type="text" value="{{ \App\Support\OldInput::text('name', $channel?->name) }}">
     <div class="field-foot">
         @error('name')<span class="err">{{ $message }}</span>@else<span class="help">{{ $nameHelp }}</span>@enderror
         <span class="count">50文字まで</span>
@@ -12,7 +12,7 @@
 </div>
 <div class="field @error('description') is-error @enderror">
     <label class="label" for="description">説明</label>
-    <textarea class="textarea" id="description" name="description">{{ old('description', $channel?->description) }}</textarea>
+    <textarea class="textarea" id="description" name="description">{{ \App\Support\OldInput::text('description', $channel?->description) }}</textarea>
     <div class="field-foot">
         @error('description')<span class="err">{{ $message }}</span>@else<span class="help">{{ $descriptionHelp }}</span>@enderror
         <span class="count">200文字まで</span>

@@ -4,7 +4,7 @@
     @method('PUT')
     @include('channels._thread-field')
     <div class="field @error('edit_body') is-error @enderror">
-        <textarea class="textarea" name="edit_body" aria-label="メッセージの編集">{{ old('edit_body', $message->body) }}</textarea>
+        <textarea class="textarea" name="edit_body" aria-label="メッセージの編集">{{ \App\Support\OldInput::text('edit_body', $message->body) }}</textarea>
         <div class="field-foot">
             {{-- @error と @else の組は使わない。@else の側を通ると、同じ名前の $message（直すメッセージ）が消える --}}
             @if ($errors->has('edit_body'))<span class="err">{{ $errors->first('edit_body') }}</span>@else<span></span>@endif

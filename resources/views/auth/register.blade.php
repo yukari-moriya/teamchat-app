@@ -8,13 +8,13 @@
         @csrf
         <div class="field @error('name') is-error @enderror">
             <label class="label" for="name">表示名<span class="req">*</span></label>
-            <input class="input" id="name" name="name" type="text" value="{{ old('name') }}" autocomplete="name">
+            <input class="input" id="name" name="name" type="text" value="{{ \App\Support\OldInput::text('name') }}" autocomplete="name">
             @error('name')<span class="err">{{ $message }}</span>@enderror
             <div class="field-foot"><span class="help">メッセージに表示される名前です。</span><span class="count">30文字まで</span></div>
         </div>
         <div class="field @error('email') is-error @enderror">
             <label class="label" for="email">メールアドレス<span class="req">*</span></label>
-            <input class="input" id="email" name="email" type="text" value="{{ old('email') }}" autocomplete="email">
+            <input class="input" id="email" name="email" type="text" value="{{ \App\Support\OldInput::text('email') }}" autocomplete="email">
             @error('email')<span class="err">{{ $message }}</span>@enderror
         </div>
         <div class="field @error('password') is-error @enderror">

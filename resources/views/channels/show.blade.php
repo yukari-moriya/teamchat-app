@@ -61,7 +61,7 @@
         @csrf
         @include('channels._thread-field')
         <div class="composer__box">
-            <textarea class="composer__ta" name="body" placeholder="#{{ $channel->name }} にメッセージを送る" aria-label="メッセージ">{{ old('body') }}</textarea>
+            <textarea class="composer__ta" name="body" placeholder="#{{ $channel->name }} にメッセージを送る" aria-label="メッセージ">{{ \App\Support\OldInput::text('body') }}</textarea>
             <div class="composer__foot">
                 <span class="count">1,000文字まで</span>
                 <button type="submit" class="btn btn--primary btn--sm">送信</button>
