@@ -20,8 +20,7 @@
                     </div>
                     <div class="row__acts">
                         @can('manageMembers', $channel)
-                            {{-- 行き先の画面とルートは実装単位 3 で作る --}}
-                            <a class="btn btn--sm" href="{{ url("/channels/{$channel->id}/members") }}">メンバー</a>
+                            <a class="btn btn--sm" href="{{ route('channels.members.index', $channel) }}">メンバー</a>
                         @endcan
                         @can('update', $channel)
                             <a class="btn btn--sm" href="{{ route('channels.edit', $channel) }}">編集</a>

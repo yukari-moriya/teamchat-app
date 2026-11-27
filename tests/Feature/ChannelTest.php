@@ -596,7 +596,7 @@ class ChannelTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->seed(DatabaseSeeder::class);
 
-        $rows = Channel::inListOrder()->with(['creator', 'members'])->get()->map(fn (Channel $channel) => [
+        $rows = Channel::inListOrder()->with(['creator', 'members' => fn ($query) => $query->orderBy('users.id')])->get()->map(fn (Channel $channel) => [
             $channel->name,
             $channel->is_private,
             $channel->creator->name,
@@ -607,7 +607,7 @@ class ChannelTest extends TestCase
             ['全体連絡', false, '鈴木 花子', []],
             ['開発', false, '佐藤 太郎', []],
             ['雑談', false, '高橋 健', []],
-            ['採用プロジェクト', true, '佐藤 太郎', ['佐藤 太郎']],
+            ['採用プロジェクト', true, '佐藤 太郎', ['佐藤 太郎', '鈴木 花子']],
         ], $rows);
 
         $response = $this->actingAs(User::where('email', 'takahashi@example.com')->sole())->get('/channels');

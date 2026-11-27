@@ -35,6 +35,15 @@ class Channel extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
+    /** メンバー管理の一覧の並び。作成者が先頭、そのあとは追加した順。同じ日時なら利用者の ID の小さい順（D-34） */
+    public function membersInListOrder(): BelongsToMany
+    {
+        return $this->members()
+            ->orderByRaw('users.id = ? desc', [$this->creator_id])
+            ->orderByPivot('created_at')
+            ->orderBy('users.id');
+    }
+
     /** 返信と削除済みも含む、このチャンネルのすべての行 */
     public function messages(): HasMany
     {
