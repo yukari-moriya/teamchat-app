@@ -13,10 +13,12 @@ class MemberController extends Controller
 {
     public function index(Channel $channel): View
     {
-        return view('members.index', [
-            'channel' => $channel,
-            'members' => $channel->membersInListOrder()->get(),
-        ]);
+        $members = $channel->membersInListOrder()->get();
+        // 行ごとの @can（removeMember）が読む members も、同じ一覧にする。
+        // 別々に読むと、あいだに外された人の行が「作成者は外せません」になる
+        $channel->setRelation('members', $members);
+
+        return view('members.index', ['channel' => $channel, 'members' => $members]);
     }
 
     public function store(StoreMemberRequest $request, Channel $channel): RedirectResponse

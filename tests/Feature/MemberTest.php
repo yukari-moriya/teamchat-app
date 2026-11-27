@@ -455,6 +455,25 @@ class MemberTest extends TestCase
         $this->assertSame(1, $xpath->query('./input[@name="_token"]', $form)->length);
     }
 
+    // TP-3-09: 一覧を読んだ直後に、別の送信でその人が外されても、作成者の扱いの行にしない
+    public function test_a_row_removed_while_the_page_is_built_is_not_shown_as_the_creator(): void
+    {
+        $this->channel->members()->attach($this->other);
+        $removed = false;
+        DB::listen(function ($query) use (&$removed) {
+            if (! $removed && str_ends_with($query->sql, '`users`.`id` asc')) {
+                $removed = true;
+                DB::table('channel_user')->where('user_id', $this->other->id)->delete();
+            }
+        });
+
+        $xpath = $this->xpath($this->openMembers()->assertOk());
+
+        $this->assertTrue($removed);
+        $this->assertSame(['作成者は外せません'], $this->texts($xpath, self::ROW.'/div[@class="row__acts"]/span'));
+        $this->assertSame(1, $xpath->query(self::ROW.'//form')->length);
+    }
+
     // TP-3-09
     public function test_removing_the_creator_directly_is_forbidden(): void
     {
