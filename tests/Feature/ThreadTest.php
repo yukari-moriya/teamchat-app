@@ -434,6 +434,21 @@ class ThreadTest extends TestCase
         ];
     }
 
+    // TP-5-08: 配列は画面からは送れない。直接送られても、戻った先の画面が開けて、返信欄の下にエラーが出る
+    public function test_the_thread_opens_after_an_array_is_sent(): void
+    {
+        $origin = $this->message();
+
+        $this->postReply($origin->id, ['配列'])->assertRedirect($this->path("?thread={$origin->id}"));
+
+        $xpath = $this->xpath($this->openThread($origin)->assertOk());
+        $this->assertSame(
+            ['メッセージを入力してください'],
+            $this->texts($xpath, '//aside//form[@class="composer is-error"]//span[@class="err"]')
+        );
+        $this->assertSame('', $this->textarea($xpath, 'reply_body'));
+    }
+
     // TP-5-07
     #[DataProvider('bodyLengths')]
     public function test_reply_length_limit(string $body, bool $passes): void

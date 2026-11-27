@@ -35,7 +35,8 @@
     <form @class(['composer', 'is-error' => $errors->has('reply_body')]) method="POST" action="{{ route('channels.messages.replies.store', [$channel, $thread]) }}" novalidate>
         @csrf
         <div class="composer__box">
-            <textarea class="composer__ta" name="reply_body" placeholder="返信を送る" aria-label="返信">{{ old('reply_body') }}</textarea>
+            {{-- 前回の入力値は、文字列のときだけ戻す。画面を通さずに配列を送られても、この画面が開くように --}}
+            <textarea class="composer__ta" name="reply_body" placeholder="返信を送る" aria-label="返信">{{ is_string(old('reply_body')) ? old('reply_body') : '' }}</textarea>
             <div class="composer__foot">
                 <span class="count">1,000文字まで</span>
                 <button type="submit" class="btn btn--primary btn--sm">送信</button>
