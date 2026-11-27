@@ -64,7 +64,7 @@ class MessageSeeder extends Seeder
     {
         $key = ['channel_id' => $channel->id, 'user_id' => $user->id, 'created_at' => $postedAt];
 
-        if (Message::where($key)->whereNull('parent_id')->exists()) {
+        if ($channel->topLevelMessages()->where($key)->exists()) {
             return;
         }
 

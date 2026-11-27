@@ -62,8 +62,19 @@ class Channel extends Model
      */
     public function threadOrigin(mixed $id): ?Message
     {
-        // 数字に限るのは、MySQL が「1abc」を 1 と読むのを防ぐため
-        return is_string($id) && ctype_digit($id) ? $this->topLevelMessages()->find($id) : null;
+        return $this->findByInputId($this->topLevelMessages(), $id);
+    }
+
+    /** edit の値が指す、このチャンネルの行（返信と削除済みも含む）。無ければ null */
+    public function findMessage(mixed $id): ?Message
+    {
+        return $this->findByInputId($this->messages(), $id);
+    }
+
+    /** URL やフォームから受け取った ID で探す。数字に限るのは、MySQL が「1abc」を 1 と読むのを防ぐため */
+    private function findByInputId(HasMany $messages, mixed $id): ?Message
+    {
+        return is_string($id) && ctype_digit($id) ? $messages->find($id) : null;
     }
 
     /**

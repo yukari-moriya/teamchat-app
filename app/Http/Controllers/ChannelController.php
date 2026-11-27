@@ -97,8 +97,7 @@ class ChannelController extends Controller
             return null;
         }
 
-        // 数字に限るのは、MySQL が「1abc」を 1 と読むのを防ぐため
-        $message = is_string($id) && ctype_digit($id) ? $channel->messages()->find($id) : null;
+        $message = $channel->findMessage($id);
         abort_if($message === null, 404);
 
         if ($message->isReply() && $message->parent_id !== $thread?->id) {
@@ -115,7 +114,7 @@ class ChannelController extends Controller
         // 確認に出すのは、そのときの実際の件数。削除済みも数える（Q-28、D-05）
         if ($confirmDelete) {
             $channel->loadCount([
-                'messages as message_count' => fn ($query) => $query->whereNull('parent_id'),
+                'topLevelMessages as message_count',
                 'messages as reply_count' => fn ($query) => $query->whereNotNull('parent_id'),
             ]);
         }
