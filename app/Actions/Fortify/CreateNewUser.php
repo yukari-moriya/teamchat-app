@@ -21,9 +21,10 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        // 前後の空白・改行を取り除いてから見る（D-02）。パスワードは取り除かない
-        $name = TextNormalizer::trim((string) ($input['name'] ?? ''));
-        $email = TextNormalizer::trim((string) ($input['email'] ?? ''));
+        // 前後の空白・改行を取り除いてから見る（D-02）。パスワードは取り除かない。
+        // 文字でない値（画面を通さずに配列を送ったとき）は、表示名とメールアドレスは空として扱う
+        $name = TextNormalizer::trim(is_string($input['name'] ?? null) ? $input['name'] : '');
+        $email = TextNormalizer::trim(is_string($input['email'] ?? null) ? $input['email'] : '');
 
         Validator::make(
             [
@@ -49,7 +50,8 @@ class CreateNewUser implements CreatesNewUsers
                     fn ($attribute, $value, $fail) => User::where('email_normalized', TextNormalizer::normalize($value))->exists()
                         ? $fail('そのメールアドレスはすでに使われています') : null,
                 ],
-                'password' => ['bail', 'required', 'min:8'],
+                // string が無いと、配列の min:8 は要素の数を数えて、8個以上の配列が通る
+                'password' => ['bail', 'required', 'string', 'min:8'],
                 'password_confirmation' => ['bail', 'required', 'same:password'],
             ],
             [
@@ -59,6 +61,7 @@ class CreateNewUser implements CreatesNewUsers
                 'email.max' => 'メールアドレスは254文字以内で入力してください',
                 'email.email' => 'メールアドレスの形式で入力してください',
                 'password.required' => 'パスワードを入力してください',
+                'password.string' => 'パスワードを入力してください',
                 'password.min' => 'パスワードは8文字以上で入力してください',
                 'password_confirmation.required' => 'パスワード（確認用）を入力してください',
                 'password_confirmation.same' => 'パスワード（確認用）がパスワードと一致しません',

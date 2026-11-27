@@ -43,7 +43,7 @@
                             @csrf
                             @method('DELETE')
                             <div class="field @error('confirm_name') is-error @enderror" style="margin-bottom:0">
-                                <input class="input" name="confirm_name" type="text" value="{{ old('confirm_name') }}" placeholder="{{ $channel->name }}" aria-label="チャンネル名の確認" style="max-width:280px">
+                                <input class="input" name="confirm_name" type="text" value="{{ \App\Support\OldInput::text('confirm_name') }}" placeholder="{{ $channel->name }}" aria-label="チャンネル名の確認" style="max-width:280px">
                                 @error('confirm_name')<span class="err">{{ $message }}</span>@enderror
                             </div>
                             <div class="inline-2" style="justify-content:flex-end;margin-top:var(--sp-5)">

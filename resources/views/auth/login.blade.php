@@ -8,7 +8,7 @@
         @csrf
         <div class="field @error('email') is-error @enderror">
             <label class="label" for="email">メールアドレス</label>
-            <input class="input" id="email" name="email" type="text" value="{{ old('email') }}" autocomplete="username">
+            <input class="input" id="email" name="email" type="text" value="{{ \App\Support\OldInput::text('email') }}" autocomplete="username">
             @error('email')<span class="err">{{ $message }}</span>@enderror
         </div>
         <div class="field @error('password') is-error @enderror">

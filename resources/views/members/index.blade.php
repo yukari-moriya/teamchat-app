@@ -18,8 +18,7 @@
                 @csrf
                 <div class="field @error('member') is-error @enderror" style="max-width:520px;margin-bottom:0">
                     <div class="inline-2">
-                        {{-- 配列を直接送られると、前回の入力値も配列になるので、文字列のときだけ戻す --}}
-                        <input class="input" name="member" type="text" value="{{ is_string(old('member')) ? old('member') : '' }}" placeholder="表示名またはメールアドレスで探す" aria-labelledby="member-heading">
+                        <input class="input" name="member" type="text" value="{{ \App\Support\OldInput::text('member') }}" placeholder="表示名またはメールアドレスで探す" aria-labelledby="member-heading">
                         <button type="submit" class="btn btn--primary"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>追加</button>
                     </div>
                     @error('member')<span class="err">{{ $message }}</span>@enderror
