@@ -596,7 +596,7 @@ class ChannelTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->seed(DatabaseSeeder::class);
 
-        $rows = Channel::inListOrder()->with(['creator', 'members'])->get()->map(fn (Channel $channel) => [
+        $rows = Channel::inListOrder()->with(['creator', 'members' => fn ($query) => $query->orderBy('users.id')])->get()->map(fn (Channel $channel) => [
             $channel->name,
             $channel->is_private,
             $channel->creator->name,

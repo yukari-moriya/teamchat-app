@@ -192,6 +192,20 @@ class MemberTest extends TestCase
         $this->assertSame(['作成者の人', '先に追加', '同着で ID が小さい', '同着で ID が大きい'], $this->memberNames($response));
     }
 
+    // TP-3-01（D-34）: 上のテストは、利用者の ID の指定が無くても通る（DB がたまたま ID の順で返す）。
+    // そのため、画面が実際に投げる問い合わせの、並びの指定も確かめる
+    public function test_the_member_list_query_breaks_ties_by_user_id(): void
+    {
+        DB::enableQueryLog();
+        $this->openMembers()->assertOk();
+        DB::disableQueryLog();
+
+        $this->assertNotEmpty(array_filter(
+            array_column(DB::getQueryLog(), 'query'),
+            fn (string $sql) => str_ends_with($sql, 'order by users.id = ? desc, `channel_user`.`created_at` asc, `users`.`id` asc'),
+        ));
+    }
+
     // TP-3-01: 行が増えても、問い合わせは増えない
     public function test_the_number_of_queries_does_not_grow_with_members(): void
     {
@@ -300,6 +314,16 @@ class MemberTest extends TestCase
 
         $this->get($this->url())->assertOk()->assertSee($message);
         $this->assertDatabaseCount('channel_user', 1);
+    }
+
+    // TP-3-04: 配列は画面からは送れない。直接送られても、戻った先の画面が開けて、エラーが出る
+    public function test_the_page_opens_after_an_array_is_sent(): void
+    {
+        $this->addMember(['takahashi@example.com'])->assertRedirect($this->url());
+
+        $response = $this->get($this->url())->assertOk()->assertSee('表示名またはメールアドレスを入力してください');
+
+        $this->assertSame('', $this->xpath($response)->query('//input[@name="member"]')->item(0)->getAttribute('value'));
     }
 
     // TP-3-05
@@ -451,8 +475,8 @@ class MemberTest extends TestCase
         foreach (['takahashi@example.com', '', 'いない人'] as $input) {
             $this->addMember($input, $this->other)->assertForbidden();
         }
-        // ほかの人・自分・作成者のどれを外そうとしても同じ
-        foreach ([$anotherMember, $this->other, $this->me] as $target) {
+        // ほかの人・自分・作成者・メンバーでない人のどれを外そうとしても同じ。違うと、誰がメンバーかが分かる（D-35）
+        foreach ([$anotherMember, $this->other, $this->me, $this->outsider] as $target) {
             $this->removeMember($target, $this->other)->assertForbidden();
         }
 
@@ -509,7 +533,7 @@ class MemberTest extends TestCase
         $this->assertSame($rows, $this->memberRows());
     }
 
-    // TP-3-12
+    // TP-3-12: 作成者が、メンバーでない利用者を指したとき。存在しない ID も含む
     public function test_removing_a_user_who_is_not_a_member_is_404(): void
     {
         $this->channel->members()->attach($this->other);
@@ -520,6 +544,19 @@ class MemberTest extends TestCase
         // 数字で始まる別の文字列が、その ID の利用者にならない
         foreach ([$this->outsider->id, 999999, "{$this->other->id}abc", "{$this->me->id}abc", 'abc'] as $userId) {
             $this->removeMember($userId)->assertNotFound();
+        }
+
+        $this->assertSame($rows, $this->memberRows());
+    }
+
+    // TP-3-12（D-35）: 存在しない利用者の ID は、作成者でない人が送っても 404
+    public function test_a_missing_user_id_is_404_for_a_member_who_is_not_the_creator(): void
+    {
+        $this->channel->members()->attach($this->other);
+        $rows = $this->memberRows();
+
+        foreach ([999999, "{$this->me->id}abc", 'abc'] as $userId) {
+            $this->removeMember($userId, $this->other)->assertNotFound();
         }
 
         $this->assertSame($rows, $this->memberRows());

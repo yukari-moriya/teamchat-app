@@ -67,10 +67,4 @@ class Channel extends Model
     {
         $query->orderBy('created_at')->orderBy('id');
     }
-
-    /** ルートの scopeBindings() は {user} の関連を users() と探すので、members() を指す */
-    protected function childRouteBindingRelationshipName($childType)
-    {
-        return $childType === 'user' ? 'members' : parent::childRouteBindingRelationshipName($childType);
-    }
 }

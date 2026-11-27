@@ -42,9 +42,10 @@ Route::middleware('auth')->group(function () {
                 ->name('channels.members.index');
             Route::post('/channels/{channel}/members', [MemberController::class, 'store'])
                 ->name('channels.members.store');
-            // {user} は {channel} のメンバーに限る（違えば 404）。そのあとで、作成者でないかを確かめる（403）
+            // {user} がメンバーかは scopeBindings() で絞らない。権限の確認より先に動き、誰がメンバーかが分かるため。
+            // 作成者かを確かめたあとに、removeMember で確かめる（D-35）
             Route::delete('/channels/{channel}/members/{user}', [MemberController::class, 'destroy'])
-                ->name('channels.members.destroy')->scopeBindings()->whereNumber('user')
+                ->name('channels.members.destroy')->whereNumber('user')
                 ->can('removeMember', ['channel', 'user']);
         });
 
