@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## このリポジトリは何か
 
 社内向けチームチャットアプリ（Laravel 10 / MySQL 8.4 / Sail）を、仕様書と設計書に従って作り切るための課題リポジトリ（Tutorial 16「総仕上げ」）。
-いまあるのは素のLaravelと設計書一式だけで、機能のコード（モデル・コントローラ・マイグレーション・画面）はまだ無い。
+機能は、実装単位（`docs/design/acceptance.md` の1〜7）ごとに作って足していく。どこまで作ったかは、マージ済みのプルリクエストで分かる。
 実装の前に、まず下の「決めごとの在りか」で該当する設計書を開くこと。
 
 ## 決めごとの在りか
