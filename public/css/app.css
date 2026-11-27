@@ -375,3 +375,13 @@ mark{background:#FBEBBD;color:inherit;border-radius:2px;padding:0 1px}
 .composer.is-error .composer__box{border-color:var(--danger);background:var(--danger-soft)}
 .composer.is-error .composer__box:focus-within{box-shadow:0 0 0 3px rgba(179,38,30,.2)}
 .composer .err{margin-top:var(--sp-2)}
+/* スレッドのパネル — .main と同じく、これが無いと返信が増えたときに返信欄が下へ押し出される。スクロールするのはパネルの中だけにする */
+.thread{min-height:0}
+/* パネルの見出しのチャンネル名 — 記号の部品との間の改行が空白に見えないように、flex にする（見本は詰めて並べている） */
+.thread__head .t-caption{display:flex;align-items:center}
+/* 区切りの無い長いチャンネル名は途中で折り返す。これが無いと、閉じるリンクがパネルの外へ押し出される */
+.thread__head > div{min-width:0}
+.thread__head .t-caption{overflow-wrap:anywhere}
+/* パネルを閉じるのは、ボタンではなくリンクなので、下線を出さない。幅は、見出しが長くても縮めない */
+.thread__head a.icon-btn{flex:none}
+.thread__head a.icon-btn:hover{text-decoration:none}

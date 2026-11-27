@@ -17,8 +17,9 @@ use Tests\TestCase;
 
 /**
  * メッセージ（実装単位 4）。観点は docs/design/acceptance.md の 2-4（TP-4-01〜18）と、2-8 の初期データの分。
+ * 次の部分は、ほかのテストで確かめる。
+ * TP-4-05 の「スレッドを開いていれば開いたまま」、TP-4-11 の thread と返信の編集 → ThreadTest（実装単位 5）。
  * 次の部分は、後の実装単位のテストに回す。
- * TP-4-05 の「スレッドを開いていれば開いたまま」、TP-4-11 の thread と返信の編集 → 実装単位 5（SC-05）。
  * TP-4-07 の「検索に出る・出ない」→ 実装単位 6（ここでは、検索が使う写しの列が直ることを確かめる）。
  * TP-4-14 の「マウスを乗せたときだけ」は CSS なので、ブラウザで確かめる。
  */
@@ -609,7 +610,7 @@ class MessageTest extends TestCase
         $this->assertSame([$kept->id], Message::notDeleted()->pluck('id')->all());
     }
 
-    // TP-8-01〜03 の、メッセージの分（返信は実装単位 5）。何度流しても増えない
+    // TP-8-01〜03 の、メッセージの分（返信は ThreadTest）。何度流しても増えない
     public function test_seeded_messages(): void
     {
         Channel::query()->delete();
@@ -619,10 +620,10 @@ class MessageTest extends TestCase
 
         $this->assertSame(
             ['全体連絡' => 3, '開発' => 8, '雑談' => 2, '採用プロジェクト' => 3],
-            Channel::inListOrder()->withCount('messages')->get()->pluck('messages_count', 'name')->all()
+            Channel::inListOrder()->withCount('topLevelMessages')->get()->pluck('top_level_messages_count', 'name')->all()
         );
 
-        $development = Channel::where('name', '開発')->sole()->messages()->inListOrder()->with('user')->get();
+        $development = Channel::where('name', '開発')->sole()->topLevelMessages()->inListOrder()->with('user')->get();
         $this->assertSame(
             [
                 '09:12 鈴木 花子', '09:20 高橋 健', '09:31 佐藤 太郎', '10:05 高橋 健',

@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * 初期データのメッセージ（docs/design/features.md の F-26、data.md の4章、D-30）。返信は実装単位 5 で作る。
+ * 初期データのメッセージ（docs/design/features.md の F-26、data.md の4章、D-30）。返信は ReplySeeder で作る。
  * 「開発」の8件は mockup/channel-show.html、検索の見本の3件は mockup/search.html のとおり。
  * モックに無い本文は、ここで作った（D-27）。「リリース」を含むのは検索の見本の3件だけにする。
  * 日時は固定で、何度流しても増えない。
@@ -64,7 +64,7 @@ class MessageSeeder extends Seeder
     {
         $key = ['channel_id' => $channel->id, 'user_id' => $user->id, 'created_at' => $postedAt];
 
-        if (Message::where($key)->whereNull('parent_id')->exists()) {
+        if ($channel->topLevelMessages()->where($key)->exists()) {
             return;
         }
 

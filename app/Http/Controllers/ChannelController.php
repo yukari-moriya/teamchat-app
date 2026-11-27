@@ -6,6 +6,7 @@ use App\Http\Requests\ChannelRequest;
 use App\Http\Requests\DestroyChannelRequest;
 use App\Http\Requests\StoreChannelRequest;
 use App\Models\Channel;
+use App\Models\Message;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,20 +50,46 @@ class ChannelController extends Controller
 
     public function show(Request $request, Channel $channel): View
     {
+        $thread = $this->openThread($request, $channel);
+
         return view('channels.show', [
             'channel' => $channel,
             // チャンネルの流れに返信は混ぜない。削除済みも取り出し、返信件数は削除された返信も数える（D-05、Q-18）
-            'messages' => $channel->messages()->whereNull('parent_id')->inListOrder()
+            'messages' => $channel->topLevelMessages()->inListOrder()
                 ->with('user')->withCount('replies')->get(),
-            'editingMessageId' => $this->editingMessageId($request, $channel),
+            // 開いているスレッドの元のメッセージ。開いていなければ null
+            'thread' => $thread,
+            'editingMessageId' => $this->editingMessageId($request, $channel, $thread),
+        ]);
+    }
+
+    /**
+     * ?thread= で開くスレッド（docs/design/permissions-api.md 2-2）。
+     * このチャンネルに無いIDと、返信のIDは 404。削除されたメッセージは開ける（R-06）。
+     */
+    private function openThread(Request $request, Channel $channel): ?Message
+    {
+        $id = $request->query('thread');
+
+        if ($id === null) {
+            return null;
+        }
+
+        $origin = $channel->threadOrigin($id);
+        abort_if($origin === null, 404);
+
+        return $origin->load([
+            'user',
+            'replies' => fn ($query) => $query->inListOrder()->with('user'),
         ]);
     }
 
     /**
      * ?edit= で編集中にするメッセージ（docs/design/permissions-api.md 2-2）。
-     * このチャンネルに無いIDは 404。あっても直せないもの（他人の・削除済み）と返信は、通常の表示にする（D-26）。
+     * このチャンネルに無いIDは 404。あっても直せないもの（他人の・削除済み）は、通常の表示にする。
+     * 返信は、その返信の元のスレッドを開いていなければ、通常の表示にする（D-26）。
      */
-    private function editingMessageId(Request $request, Channel $channel): ?int
+    private function editingMessageId(Request $request, Channel $channel, ?Message $thread): ?int
     {
         $id = $request->query('edit');
 
@@ -70,11 +97,14 @@ class ChannelController extends Controller
             return null;
         }
 
-        // 数字に限るのは、MySQL が「1abc」を 1 と読むのを防ぐため
-        $message = is_string($id) && ctype_digit($id) ? $channel->messages()->find($id) : null;
+        $message = $channel->findMessage($id);
         abort_if($message === null, 404);
 
-        return $message->parent_id === null && $request->user()->can('update', $message) ? $message->id : null;
+        if ($message->isReply() && $message->parent_id !== $thread?->id) {
+            return null;
+        }
+
+        return $request->user()->can('update', $message) ? $message->id : null;
     }
 
     public function edit(Request $request, Channel $channel): View
@@ -84,7 +114,7 @@ class ChannelController extends Controller
         // 確認に出すのは、そのときの実際の件数。削除済みも数える（Q-28、D-05）
         if ($confirmDelete) {
             $channel->loadCount([
-                'messages as message_count' => fn ($query) => $query->whereNull('parent_id'),
+                'topLevelMessages as message_count',
                 'messages as reply_count' => fn ($query) => $query->whereNotNull('parent_id'),
             ]);
         }

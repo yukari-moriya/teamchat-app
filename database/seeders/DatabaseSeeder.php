@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             ChannelSeeder::class,
             MemberSeeder::class,
             MessageSeeder::class,
+            ReplySeeder::class,
         ]);
     }
 }

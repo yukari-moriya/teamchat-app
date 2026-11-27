@@ -12,12 +12,14 @@ class UpdateMessageRequest extends MessageRequest
         return 'edit_body';
     }
 
-    /** エラーのときは、編集中の状態の、その行の位置へ戻す（D-02・D-32） */
+    /**
+     * エラーのときは、編集中の状態の、その行の位置へ戻す（D-02・D-32）。
+     * 開いていたスレッドは開いたままにする。thread の扱いは、操作が通ったときと同じ（D-37）。
+     */
     protected function getRedirectUrl(): string
     {
-        $message = $this->route('message');
+        $thread = $this->route('channel')->threadOrigin($this->input('thread'));
 
-        return route('channels.show', ['channel' => $this->route('channel'), 'edit' => $message->id])
-            .'#'.$message->anchor();
+        return $this->route('message')->url($thread?->id, editing: true);
     }
 }

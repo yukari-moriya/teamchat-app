@@ -71,6 +71,12 @@ class Message extends Model
         return $this->deleted_at !== null;
     }
 
+    /** 返信かどうか。この判定は、ここを通す（D-38） */
+    public function isReply(): bool
+    {
+        return $this->parent_id !== null;
+    }
+
     /** 本文を直す。本文が変わらないときは、何も変えない（D-25）。「編集済み」は戻さない（R-05） */
     public function edit(string $body): void
     {
@@ -93,6 +99,20 @@ class Message extends Model
     /** チャンネルの画面の中の、この行の位置の名前（URL の # で指す。permissions-api.md 2-2） */
     public function anchor(): string
     {
-        return "message-{$this->id}";
+        return ($this->isReply() ? 'reply' : 'message')."-{$this->id}";
+    }
+
+    /**
+     * チャンネルの画面の、この行の位置を指す URL（permissions-api.md 2-2）。
+     * $threadId は開いておくスレッドの元の ID、$editing はこの行を編集中にするか。
+     */
+    public function url(?int $threadId = null, bool $editing = false): string
+    {
+        $query = array_filter([
+            'thread' => $threadId,
+            'edit' => $editing ? $this->id : null,
+        ]);
+
+        return route('channels.show', ['channel' => $this->channel_id, ...$query]).'#'.$this->anchor();
     }
 }
