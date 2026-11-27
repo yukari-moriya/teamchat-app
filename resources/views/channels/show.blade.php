@@ -2,7 +2,13 @@
 
 @section('title', $channel->name)
 
-{{-- docs/design/screens.md 3-3。スレッドのパネル（SC-05）は実装単位 5 --}}
+@if ($thread !== null)
+    @section('thread')
+        @include('channels._thread')
+    @endsection
+@endif
+
+{{-- docs/design/screens.md 3-3。スレッドのパネル（SC-05）は _thread --}}
 @section('chat')
     <div class="ch-head">
         <div class="ch-head__main">
@@ -39,7 +45,7 @@
 
                     {{-- 削除されたメッセージでも出す。件数は削除された返信も数える --}}
                     @if ($message->replies_count > 0)
-                        <a class="thread-link" href="{{ route('channels.show', ['channel' => $channel, 'thread' => $message->id]) }}"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>返信{{ $message->replies_count }}件</a>
+                        <a class="thread-link" href="{{ $message->url($message->id) }}"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>返信{{ $message->replies_count }}件</a>
                     @endif
                 </x-message>
             @endforeach
@@ -53,6 +59,7 @@
 
     <form @class(['composer', 'is-error' => $errors->has('body')]) method="POST" action="{{ route('channels.messages.store', $channel) }}" novalidate>
         @csrf
+        @include('channels._thread-field')
         <div class="composer__box">
             <textarea class="composer__ta" name="body" placeholder="#{{ $channel->name }} にメッセージを送る" aria-label="メッセージ">{{ old('body') }}</textarea>
             <div class="composer__foot">

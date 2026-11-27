@@ -50,6 +50,22 @@ class Channel extends Model
         return $this->hasMany(Message::class);
     }
 
+    /** チャンネルに直接書かれたメッセージ。返信は含まず、削除済みは含む */
+    public function topLevelMessages(): HasMany
+    {
+        return $this->messages()->whereNull('parent_id');
+    }
+
+    /**
+     * thread の値（URL のクエリ・フォームの項目）が指す、スレッドの元のメッセージ。
+     * このチャンネルの返信でないメッセージの ID でなければ null。値が null のときの扱いは、呼ぶ側が決める。
+     */
+    public function threadOrigin(mixed $id): ?Message
+    {
+        // 数字に限るのは、MySQL が「1abc」を 1 と読むのを防ぐため
+        return is_string($id) && ctype_digit($id) ? $this->topLevelMessages()->find($id) : null;
+    }
+
     /**
      * 見られるチャンネル（公開はすべて＋自分がメンバーのプライベート）。
      * この条件はここにだけ書き、サイドバー・一覧・重複チェック・権限の判定はすべてここを通す

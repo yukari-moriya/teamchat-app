@@ -20,7 +20,7 @@
             </form>
         </div>
     </header>
-    <div class="app__body">
+    <div @class(['app__body', 'app__body--thread' => View::hasSection('thread')])>
         <nav class="sidebar">
             <div class="side-group">チャンネル</div>
             @foreach ($sidebarChannels as $sidebarChannel)
@@ -43,6 +43,8 @@
                 </div>
             </main>
         @endif
+        {{-- スレッドのパネル（SC-05）。開いているときだけ、本文の右に置く --}}
+        @yield('thread')
     </div>
 </div>
 </body>

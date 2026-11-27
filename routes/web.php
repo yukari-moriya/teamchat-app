@@ -3,6 +3,7 @@
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ReplyController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
@@ -51,8 +52,11 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/channels/{channel}/messages', [MessageController::class, 'store'])
             ->name('channels.messages.store');
-        // {message} は {channel} のものに限る（違えば 404）。そのあとで、本人のメッセージかを確かめる（403）
+        // {message} は {channel} のものに限る（違えば 404）。直す・消すは、そのあとで本人のメッセージかを確かめる（403）
         Route::scopeBindings()->whereNumber('message')->group(function () {
+            // 返信には本人の条件が無いので can は付けない。返信への返信は StoreReplyRequest が 404 にする（D-38）
+            Route::post('/channels/{channel}/messages/{message}/replies', [ReplyController::class, 'store'])
+                ->name('channels.messages.replies.store');
             Route::put('/channels/{channel}/messages/{message}', [MessageController::class, 'update'])
                 ->name('channels.messages.update')->can('update', 'message');
             Route::delete('/channels/{channel}/messages/{message}', [MessageController::class, 'destroy'])
