@@ -429,7 +429,7 @@ JavaScript を使わない（D-03）ので、SC-04・SC-05・SC-07・SC-09 の�
 |:--|:--|:--|:--|
 | 404 | `{channel}` が、**存在しないID・プライベートチャンネルのID・数字でないもの**のとき。`/api` そのものと、`/api/` の下の、無いURLのとき（改行や、文字として読めないバイトが混ざったURLも） | **いつも** `{"message": "Not Found"}` | Q-27 |
 | 405 | GET 以外で呼ばれたとき（`HEAD` と `OPTIONS` を除く。下の注） | `{"message": "Method Not Allowed"}` | spec 3-7 / D-43 |
-| 429 | 呼ぶ回数の上限を超えたとき（呼ぶ側のIPごとに1分60回。2つのAPIを合わせて数える。Laravel の既定のまま） | `{"message": "Too Many Attempts."}` | D-18 |
+| 429 | 呼ぶ回数の上限を超えたとき（呼ぶ側のIPごとに1分60回。2つのAPIを合わせて数える。回数は Laravel の既定のまま。ログインは見ず、IP だけで数える） | `{"message": "Too Many Attempts."}` | D-18 |
 | 500 | 想定外の失敗（データベースにつながらない、など） | `{"message": "Server Error"}`（中身の詳しいことは出さない） | `behavior.md` 3章 |
 
 - `HEAD` と `OPTIONS` は、Laravel の標準のまま扱う（D-43）。`HEAD` は `GET` と同じ扱い（本文は返さない）。`OPTIONS` は、あるURLには 200 と、使えるメソッドを示す `Allow` を返す。どちらにも、ブラウザ向けの許可のヘッダは付けない（3-1）
