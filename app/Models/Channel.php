@@ -85,8 +85,14 @@ class Channel extends Model
     public function scopeVisibleTo(Builder $query, User $user): void
     {
         $query->where(fn (Builder $query) => $query
-            ->where('is_private', false)
+            ->public()
             ->orWhereHas('members', fn (Builder $members) => $members->whereKey($user->getKey())));
+    }
+
+    /** 公開チャンネル。「公開」で絞る条件はここにだけ書き、公開APIは、利用者を見ずにここを通す（1-3 の e） */
+    public function scopePublic(Builder $query): void
+    {
+        $query->where('is_private', false);
     }
 
     /** 作成日時の古い順。同じ日時なら ID の小さい順（D-17） */

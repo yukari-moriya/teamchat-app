@@ -266,7 +266,7 @@
 | TP-7-07 | 続きを取るあいだに新しいメッセージが書かれても、同じメッセージが2回返らない | 境界値 | permissions-api.md 3-3 |
 | TP-7-08 | 壊れた `cursor` を入れると、エラーにならず最初から返す | 異常系 | permissions-api.md 3-3 |
 | TP-7-09 | 存在しないID・プライベートチャンネルのID・数字でないもの・`/api/` の下の無いURLは、どれも同じ本文 `{"message": "Not Found"}` の 404 になる | 異常系 | permissions-api.md 3-4 / questions.md Q-27 |
-| TP-7-10 | GET 以外で呼ぶと 405 になる | 異常系 | permissions-api.md 3-4 |
+| TP-7-10 | GET 以外（`HEAD`・`OPTIONS` を除く）で呼ぶと 405 になる | 異常系 | permissions-api.md 3-4 / questions.md D-43 |
 | TP-7-11 | `Accept` を付けずに呼んでも、エラーを含めて JSON で返る | 異常系 | permissions-api.md 3-1 |
 | TP-7-12 | ログインしていてもしていなくても同じ結果になる（プライベートチャンネルのメンバーが呼んでも、そのチャンネルは返らない） | 異常系 | permissions-api.md 1-3 e・1-4 |
 | TP-7-13 | 日時が日本時間の時差つきの形（`+09:00`）で返る | 正常系 | permissions-api.md 3-1 / questions.md Q-31 |

@@ -30,7 +30,7 @@ class SearchController extends Controller
             ->whereHas('channel', fn ($query) => $query->visibleTo($request->user()))
             ->notDeleted()
             ->containingAll($keywords)
-            ->inSearchOrder()
+            ->inNewestOrder()
             ->with(['channel', 'user'])
             ->paginate(self::PER_PAGE, page: $page)
             ->appends(['q' => $keyword]);

@@ -24,8 +24,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 公開APIは、呼ぶ側の IP ごとに数える。ログインしているかは見ない（docs/design/permissions-api.md 3-4）
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(60)->by($request->ip());
         });
 
         $this->routes(function () {
