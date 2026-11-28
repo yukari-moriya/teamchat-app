@@ -385,3 +385,20 @@ mark{background:#FBEBBD;color:inherit;border-radius:2px;padding:0 1px}
 /* パネルを閉じるのは、ボタンではなくリンクなので、下線を出さない。幅は、見出しが長くても縮めない */
 .thread__head a.icon-btn{flex:none}
 .thread__head a.icon-btn:hover{text-decoration:none}
+/* 上部バーの検索 — モックは見た目だけの枠なので、枠はそのままで中に入力欄を置く。フォーカスの印は、枠の側に出す（design-guide の4章） */
+.topbar__search form{margin:0}
+.search-input input{flex:1;min-width:0;padding:0;border:0;background:transparent;color:var(--text-inverse);font-size:var(--fs-label)}
+.search-input input::placeholder{color:#A9B3BF}
+.search-input input:focus{outline:none}
+.search-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--focus-ring)}
+/* 検索結果の行 — 行全体をリンクにするので（モックは押せる形が無い）、文字の色を変えず、下線を出さない */
+a.row{color:inherit}
+a.row:hover{color:inherit;text-decoration:none}
+/* 一覧の枠は、はみ出した分を隠すので、フォーカスの線は内側に出す */
+a.row:focus-visible{outline-offset:-2px}
+/* 検索結果の本文 — チャンネルの画面と同じく、書いたまま出す */
+.result__body{white-space:pre-wrap;overflow-wrap:anywhere}
+/* 区切りの無い長いチャンネル名・キーワードは途中で折り返す。これが無いと、枠の外へはみ出す */
+.result__meta,.result-count,.result-empty{overflow-wrap:anywhere}
+/* ページ送り（モックに無い） */
+.pager{display:flex;gap:var(--sp-2);margin-top:var(--sp-4)}

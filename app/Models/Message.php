@@ -60,6 +60,32 @@ class Message extends Model
         $query->whereNull('deleted_at');
     }
 
+    /**
+     * 本文の写しに、すべてのキーワードを含む（F-21、D-12）。キーワードは TextNormalizer::keywords() の結果。
+     * % と _ は、その文字そのものを探す。キーワードが無ければ、何も当てない
+     * （そろえた結果が空になる入力で、全件が出ないように）。
+     *
+     * @param  list<string>  $keywords
+     */
+    public function scopeContainingAll(Builder $query, array $keywords): void
+    {
+        if ($keywords === []) {
+            $query->whereRaw('0 = 1');
+
+            return;
+        }
+
+        foreach ($keywords as $keyword) {
+            $query->where('body_normalized', 'like', '%'.addcslashes($keyword, '\\%_').'%');
+        }
+    }
+
+    /** 検索結果の並び。新しい順で、同じ日時なら ID の小さい順（D-41） */
+    public function scopeInSearchOrder(Builder $query): void
+    {
+        $query->orderByDesc('created_at')->orderBy('id');
+    }
+
     /** 古い順。同じ日時なら ID の小さい順（R-07） */
     public function scopeInListOrder(Builder $query): void
     {
