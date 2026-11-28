@@ -34,13 +34,13 @@ Issue に着手するとき、手を動かす前の数手を飛ばすと、あ�
    ```
 
    `<owner>/<repo>` は `gh repo view --json nameWithOwner -q .nameWithOwner`。取得が「Already up to date」なのか、進んだのかを報告する（最新だと確かめられないまま進まない）。
-4. ブランチ名は CLAUDE.md の「プルリクエスト」の表に従う。**Issue 1件は `feature/issue-<番号>-<英字の短い名前>`**（例: `feature/issue-1-auth`）。名前は Issue の題から付ける。**`main` には直接コミットしない**。
+4. ブランチ名は CLAUDE.md の「変更の進め方」の表に従う。**Issue 1件は `feature/issue-<番号>-<英字の短い名前>`**（例: `feature/issue-1-auth`）。名前は Issue の題から付ける。**`main` には直接コミットしない**。
 
 ### 3. 読む
 
 質問と計画は、このアプリの今の作りを読んでから考える。読まずに聞くと、どの機能にもある一般論しか出ない。
 
-- `CLAUDE.md` の「実装前に必ず読む決定」と「決めごとの在りか」のうち、この Issue が触るところ。Issue 本文が指す設計書の章（`acceptance.md` の AC-N-x・TP-N-xx を含む）。**設計書の中身はここで覚えるだけで、計画には写さない**（計画では参照で指す。設計書が正本で、写すと2か所に決めごとができる）。
+- `CLAUDE.md` の「変える前に読む決めごと」のうち、この Issue が触るところ。Issue 本文が指す設計書の章（`acceptance.md` の AC-N-x・TP-N-xx を含む）。**設計書の中身はここで覚えるだけで、計画には写さない**（計画では参照で指す。設計書が正本で、写すと2か所に決めごとができる）。
 - 既存のコード: `app/`、`routes/web.php`、`database/migrations/`、`resources/views/`、`tests/Feature/`、`config/`。
 - 食い違いの探し物: 設計書の形と既存の migration、設計書の決めと Issue の指示、Laravel が最初から用意している物のうち使わない物（`questions.md` の D-10）、設計書が「実装のときに決める」としている項目。
 
