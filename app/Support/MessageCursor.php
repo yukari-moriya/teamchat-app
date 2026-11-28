@@ -6,7 +6,7 @@ use DateTimeImmutable;
 use stdClass;
 
 /**
- * 公開APIのメッセージ一覧の cursor の値の確かめ（docs/design/permissions-api.md 3-3、D-39）。
+ * 公開APIのメッセージ一覧の cursor の値の確かめ（docs/design/permissions-api.md 3-3、D-42）。
  * Laravel は形を確かめずに使うので、壊れ方によっては 500 になったり、一部の行だけが返ったりする。
  * Laravel の Cursor::fromEncoded は、中身が数値だとそれ自体が失敗するので、ここでは使わない。
  */

@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 /**
  * メンバー管理（実装単位 3）。観点は docs/design/acceptance.md の 2-3（TP-3-01〜14）と、2-8 の初期データの分。
- * TP-3-06・TP-3-07 の「検索に出る・出ない」→ 実装単位 6。
+ * TP-3-06・TP-3-07 の「検索に出る・出ない」→ SearchTest（実装単位 6）。
  */
 class MemberTest extends TestCase
 {

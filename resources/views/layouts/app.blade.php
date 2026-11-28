@@ -11,7 +11,14 @@
 <div class="app">
     <header class="topbar">
         <div class="topbar__brand"><span class="brandmark">チ</span>チームチャットアプリ</div>
-        <div class="topbar__search"></div>
+        <div class="topbar__search">
+            <form method="GET" action="{{ route('search') }}" role="search">
+                <div class="search-input">
+                    <svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+                    <input name="q" type="text" placeholder="メッセージを検索" aria-label="メッセージを検索">
+                </div>
+            </form>
+        </div>
         <div class="topbar__me">
             <span class="nm">{{ Auth::user()->name }}</span>
             <form method="POST" action="{{ route('logout') }}">

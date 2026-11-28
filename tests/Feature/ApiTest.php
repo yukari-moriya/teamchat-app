@@ -524,7 +524,7 @@ class ApiTest extends TestCase
         $this->get($this->messagesPath($channel))->assertJsonPath('data.0.created_at', '2026-08-17T08:30:00+09:00');
     }
 
-    // TP-7-14（OPTIONS と HEAD の扱いは D-40）
+    // TP-7-14（OPTIONS と HEAD の扱いは D-43）
     public function test_no_cors_header_is_returned(): void
     {
         $origin = ['Origin' => 'https://portal.example.test'];

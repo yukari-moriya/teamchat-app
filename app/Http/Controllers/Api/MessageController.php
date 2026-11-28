@@ -19,7 +19,7 @@ class MessageController extends Controller
         // 暗黙のモデル結合は使わない。公開チャンネルの中だけから探し、無ければ理由を問わず 404（Q-27）
         $channel = Channel::public()->findOrFail($channel);
 
-        // 壊れた cursor は、無いのと同じに扱う（D-39）。
+        // 壊れた cursor は、無いのと同じに扱う（D-42）。
         // cursorPaginate に null を渡しても Laravel がリクエストから読み直すので、リクエストの値を消す
         if (! MessageCursor::isValid($request->input('cursor'))) {
             $request->merge(['cursor' => null]);
