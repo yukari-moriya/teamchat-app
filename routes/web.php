@@ -4,6 +4,7 @@ use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
@@ -22,6 +23,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    // 見られる範囲は、検索の問い合わせそのもので絞る（docs/design/permissions-api.md 1-4）
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
     Route::get('/channels', [ChannelController::class, 'index'])->name('channels.index');
     Route::get('/channels/create', [ChannelController::class, 'create'])->name('channels.create');
     Route::post('/channels', [ChannelController::class, 'store'])->name('channels.store');
