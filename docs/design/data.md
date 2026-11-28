@@ -21,7 +21,7 @@
 | D-07 | メンバーの表には、**プライベートチャンネルだけ**持つ。作成者も1行として持つ | 公開チャンネルの行は channel_user に入らない |
 | D-08 | 削除の印の列名は `deleted_at` | SoftDeletes と見間違えないよう、定義に注記する |
 | D-09 | 「編集済み」は真偽の列（`is_edited`）で持つ。編集した日時は持たない | `updated_at` は印に使わない |
-| D-10 | Laravel が最初から用意している、**根拠の無いテーブル・列は載せない**（`password_reset_tokens`、`personal_access_tokens`、`failed_jobs`、users の `email_verified_at`・`remember_token`） | migration から消すかどうかは、実装のときに決める。作成日時・更新日時の列は例外（D-20） |
+| D-10 | Laravel が最初から用意している、**根拠の無いテーブル・列は載せない**（`password_reset_tokens`、`personal_access_tokens`、`failed_jobs`、users の `email_verified_at`・`remember_token`） | migration から消すかどうかは、実装のときに決める。3つのテーブルの migration は、実装単位 7 で消す（Sanctum も外す。`questions.md` の D-10）。作成日時・更新日時の列は例外（D-20） |
 | D-11 | D-01（ログインの仕組み）が未決のまま書いた。**D-01 はそのあと決まった** | ログイン状態はファイルに保存するので、表は増えない。CRUD表の F-02〜F-04 も埋めた |
 | D-12 | 検索・重複チェック・メンバー追加の一致は、英字の大小と全角・半角を区別せず、ひらがなとカタカナ・濁点は区別する。そろえた写しの列で比べる | messages に `body_normalized`、users に `name_normalized`・`email_normalized` を足す。UNIQUE は写しの列に付ける |
 | D-13 | メールアドレスは254文字まで | users の `email`・`email_normalized` を varchar(254) にする |
