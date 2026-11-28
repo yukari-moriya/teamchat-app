@@ -80,8 +80,11 @@ class Message extends Model
         }
     }
 
-    /** 検索結果の並び。新しい順で、同じ日時なら ID の小さい順（D-41） */
-    public function scopeInSearchOrder(Builder $query): void
+    /**
+     * 新しい順で、同じ日時なら ID の小さい順。検索結果と公開APIで使う（D-41、permissions-api.md 3-3）。
+     * 列名は公開APIの cursor の項目名になるので、テーブル名を付けない。
+     */
+    public function scopeInNewestOrder(Builder $query): void
     {
         $query->orderByDesc('created_at')->orderBy('id');
     }

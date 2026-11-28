@@ -75,18 +75,19 @@ class ApiTest extends TestCase
     /**
      * 古い順に $count 件作る。同じ日時の行が、50件の区切りをまたぐようにする。
      *
-     * @return list<int> 返るはずの順（新しい順。同じ日時なら ID の大きい順）の ID
+     * @return list<int> 返るはずの順（新しい順。同じ日時なら ID の小さい順）の ID
      */
     private function messages(int $count): array
     {
         $base = Carbon::parse('2026-08-17 09:00:00');
-        $ids = [];
+        $idsByMinute = [];
 
         for ($i = 1; $i <= $count; $i++) {
-            $ids[] = $this->message(['created_at' => $base->copy()->addMinutes(intdiv($i, 3))])->id;
+            $minute = intdiv($i, 3);
+            $idsByMinute[$minute][] = $this->message(['created_at' => $base->copy()->addMinutes($minute)])->id;
         }
 
-        return array_reverse($ids);
+        return array_merge(...array_reverse($idsByMinute));
     }
 
     private function messagesPath(Channel|int|string|null $channel = null): string
@@ -241,20 +242,20 @@ class ApiTest extends TestCase
                 'reply_count' => 0,
             ],
             [
-                'id' => $second->id,
-                'body' => '同じ時刻の連絡',
-                'author_name' => '佐藤 太郎',
-                'created_at' => '2026-08-17T09:12:00+09:00',
-                'is_edited' => false,
-                'reply_count' => 0,
-            ],
-            [
                 'id' => $first->id,
                 'body' => '朝の連絡',
                 'author_name' => '佐藤 太郎',
                 'created_at' => '2026-08-17T09:12:00+09:00',
                 'is_edited' => false,
                 'reply_count' => 2,
+            ],
+            [
+                'id' => $second->id,
+                'body' => '同じ時刻の連絡',
+                'author_name' => '佐藤 太郎',
+                'created_at' => '2026-08-17T09:12:00+09:00',
+                'is_edited' => false,
+                'reply_count' => 0,
             ],
         ], $response->json('data'));
         $this->assertSame(50, $response->json('meta.per_page'));

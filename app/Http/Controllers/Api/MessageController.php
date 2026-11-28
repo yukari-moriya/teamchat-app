@@ -25,13 +25,11 @@ class MessageController extends Controller
             $request->merge(['cursor' => null]);
         }
 
-        // 並びの列名は cursor の項目名になるので、テーブル名を付けない
         $messages = $channel->topLevelMessages()
             ->notDeleted()
+            ->inNewestOrder()
             ->with('user')
             ->withCount('replies')
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
             ->cursorPaginate(self::PER_PAGE);
 
         return MessageResource::collection($messages);
