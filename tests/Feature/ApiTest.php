@@ -437,6 +437,11 @@ class ApiTest extends TestCase
             '整数に収まらない数字' => ['/api/channels/99999999999999999999/messages'],
             '無いURL' => ['/api/no-such-url'],
             '1件のチャンネルのURL' => ['/api/channels/{public}'],
+            '/api そのもの' => ['/api'],
+            '改行が混ざる無いURL' => ['/api/no-such%0Aurl'],
+            '改行だけ' => ['/api/%0A'],
+            '文字として読めないバイト' => ['/api/%FF'],
+            'プライベートチャンネルのIDに改行' => ['/api/channels/{private}%0A/messages'],
         ];
     }
 
@@ -640,7 +645,7 @@ class ApiTest extends TestCase
     {
         $this->actingAs($this->me);
 
-        foreach (['/no-such-page', '/channels/999999'] as $path) {
+        foreach (['/no-such-page', '/channels/999999', '/apix', '/no-such-page/api'] as $path) {
             $this->get($path)
                 ->assertNotFound()
                 ->assertHeader('Content-Type', 'text/html; charset=UTF-8')

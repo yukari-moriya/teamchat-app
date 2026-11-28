@@ -56,9 +56,13 @@ class Handler extends ExceptionHandler
         );
     }
 
+    /**
+     * URL の最初の区切りで見分ける。is('api/*') は、パスに改行や文字として読めないバイトがあると
+     * 当たらず、無い URL の 404 が画面用の HTML になる。
+     */
     private function isApiRequest($request): bool
     {
-        return $request->is('api/*');
+        return $request->segment(1) === 'api';
     }
 
     private function apiErrorMessage(int $status): string
