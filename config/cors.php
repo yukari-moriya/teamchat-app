@@ -15,7 +15,8 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // 公開APIは社内ポータルのサーバーから呼ぶので、ブラウザ向けの許可は、どのURLにも出さない（Q-27）
+    'paths' => [],
 
     'allowed_methods' => ['*'],
 

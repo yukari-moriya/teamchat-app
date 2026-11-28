@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +28,46 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /** 公開APIのエラーは、呼ぶ側が Accept を付けなくても JSON で返す（docs/design/permissions-api.md 3-1） */
+    protected function shouldReturnJson($request, Throwable $e)
+    {
+        return $this->isApiRequest($request) || parent::shouldReturnJson($request, $e);
+    }
+
+    /**
+     * 公開APIのエラーの本文は message だけにして、ステータスで決める（permissions-api.md 3-4）。
+     * 例外の文言は使わない。404 の理由の違いから、プライベートチャンネルがあることが分かるため（Q-27）。
+     * APP_DEBUG が true でも同じにする。ルートが無い URL はミドルウェアを通らないので、ここで判定する。
+     */
+    protected function prepareJsonResponse($request, Throwable $e)
+    {
+        if (! $this->isApiRequest($request)) {
+            return parent::prepareJsonResponse($request, $e);
+        }
+
+        $status = $this->isHttpException($e) ? $e->getStatusCode() : 500;
+
+        return new JsonResponse(
+            ['message' => $this->apiErrorMessage($status)],
+            $status,
+            $this->isHttpException($e) ? $e->getHeaders() : [],
+        );
+    }
+
+    private function isApiRequest($request): bool
+    {
+        return $request->is('api/*');
+    }
+
+    private function apiErrorMessage(int $status): string
+    {
+        return match (true) {
+            $status >= 500 => 'Server Error',
+            // HTTP の標準の言葉（Too Many Requests）ではなく、3-4 の表の言葉
+            $status === 429 => 'Too Many Attempts.',
+            default => Response::$statusTexts[$status] ?? 'Error',
+        };
     }
 }
