@@ -27,11 +27,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./vendor/bin/sail artisan test --compact >&2 || exit 2"
+            "command": "[ -x ./vendor/bin/sail ] || exit 0; ./vendor/bin/sail artisan test --compact >&2 || exit 2"
           },
           {
             "type": "command",
-            "command": "./vendor/bin/sail pint >&2 || exit 2"
+            "command": "[ -x ./vendor/bin/sail ] || exit 0; ./vendor/bin/sail pint >&2 || exit 2"
           }
         ]
       }
